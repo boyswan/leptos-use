@@ -55,11 +55,14 @@ members = [
     "use_throttle_fn",
     "use_timeout_fn",
     "use_timestamp",
+    "use_toggle",
     "use_user_media",
+    "use_web_lock",
     "use_web_notification",
     "use_websocket",
     "use_window_focus",
     "use_window_scroll",
+    "use_window_size",
     "watch_debounced",
     "watch_pausable",
     "watch_throttled",
@@ -72,8 +75,8 @@ members = [
 exclude = ["ssr", "use_webtransport_with_server"]
 
 [workspace.dependencies]
-leptos = { git = "https://github.com/leptos-rs/leptos" }
-codee = { version = "0.2" }
+leptos = "0.7.0-beta"
+codee = "0.2"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"

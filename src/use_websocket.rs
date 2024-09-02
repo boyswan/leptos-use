@@ -239,8 +239,8 @@ where
     Tx: Send + Sync + 'static,
     Rx: Send + Sync + 'static,
     C: Encoder<Tx> + Decoder<Rx>,
-    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error=<C as Encoder<Tx>>::Error>,
-    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error=<C as Decoder<Rx>>::Error>,
+    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
+    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
 {
     use_websocket_with_options::<Tx, Rx, C>(url, UseWebSocketOptions::default())
 }
@@ -265,8 +265,8 @@ where
     Tx: Send + Sync + 'static,
     Rx: Send + Sync + 'static,
     C: Encoder<Tx> + Decoder<Rx>,
-    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error=<C as Encoder<Tx>>::Error>,
-    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error=<C as Decoder<Rx>>::Error>,
+    C: HybridEncoder<Tx, <C as Encoder<Tx>>::Encoded, Error = <C as Encoder<Tx>>::Error>,
+    C: HybridDecoder<Rx, <C as Decoder<Rx>>::Encoded, Error = <C as Decoder<Rx>>::Error>,
 {
     let url = normalize_url(url);
 
@@ -309,8 +309,8 @@ where
                 if !manually_closed_ref.get_value()
                     && !reconnect_limit.is_exceeded_by(reconnect_times_ref.get_value())
                     && ws_ref
-                    .get_value()
-                    .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
+                        .get_value()
+                        .map_or(false, |ws: WebSocket| ws.ready_state() != WebSocket::OPEN)
                 {
                     reconnect_timer_ref.set_value(
                         set_timeout_with_handle(
@@ -325,7 +325,7 @@ where
                             },
                             Duration::from_millis(reconnect_interval),
                         )
-                            .ok(),
+                        .ok(),
                     );
                 }
             }))
@@ -343,17 +343,19 @@ where
                 }
 
                 let web_socket = {
-                    protocols.as_ref().map_or_else(
-                        || WebSocket::new(&url).unwrap_throw(),
-                        |protocols| {
-                            let array = protocols
-                                .iter()
-                                .map(|p| JsValue::from(p.clone()))
-                                .collect::<Array>();
-                            WebSocket::new_with_str_sequence(&url, &JsValue::from(&array))
-                                .unwrap_throw()
-                        },
-                    )
+                    protocols.with_untracked(|protocols| {
+                        protocols.as_ref().map_or_else(
+                            || WebSocket::new(&url).unwrap_throw(),
+                            |protocols| {
+                                let array = protocols
+                                    .iter()
+                                    .map(|p| JsValue::from(p.clone()))
+                                    .collect::<Array>();
+                                WebSocket::new_with_str_sequence(&url, &JsValue::from(&array))
+                                    .unwrap_throw()
+                            },
+                        )
+                    })
                 };
                 web_socket.set_binary_type(BinaryType::Arraybuffer);
                 set_ready_state.set(ConnectionReadyState::Connecting);
@@ -369,7 +371,7 @@ where
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = diagnostics::SpecialNonReactiveZone::enter();
+                        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                         on_open(e);
 
@@ -410,7 +412,7 @@ where
                                         let txt = String::from(&txt);
 
                                         #[cfg(debug_assertions)]
-                                        let zone = diagnostics::SpecialNonReactiveZone::enter();
+                                        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                                         on_message_raw(&txt);
 
@@ -420,8 +422,7 @@ where
                                         match C::decode_str(&txt) {
                                             Ok(val) => {
                                                 #[cfg(debug_assertions)]
-                                                let prev =
-                                                    diagnostics::SpecialNonReactiveZone::enter();
+                                                let prev = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                                                 on_message(&val);
 
@@ -442,7 +443,7 @@ where
                                 let array = array.to_vec();
 
                                 #[cfg(debug_assertions)]
-                                let zone = diagnostics::SpecialNonReactiveZone::enter();
+                                let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                                 on_message_raw_bytes(&array);
 
@@ -452,7 +453,7 @@ where
                                 match C::decode_bin(array.as_slice()) {
                                     Ok(val) => {
                                         #[cfg(debug_assertions)]
-                                        let prev = diagnostics::SpecialNonReactiveZone::enter();
+                                        let prev = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                                         on_message(&val);
 
@@ -488,7 +489,7 @@ where
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = diagnostics::SpecialNonReactiveZone::enter();
+                        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                         on_error(UseWebSocketError::Event(e));
 
@@ -517,7 +518,7 @@ where
                         }
 
                         #[cfg(debug_assertions)]
-                        let zone = diagnostics::SpecialNonReactiveZone::enter();
+                        let zone = leptos::reactive_graph::diagnostics::SpecialNonReactiveZone::enter();
 
                         on_close(e);
 
@@ -650,7 +651,13 @@ where
     /// Defaults to `true`.
     immediate: bool,
     /// Sub protocols. See [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/WebSocket#protocols).
-    protocols: Option<Vec<String>>,
+    ///
+    /// Can be set as a signal to support protocols only available after the initial render.
+    ///
+    /// Note that protocols are only updated on the next websocket open() call, not whenever the signal is updated.
+    /// Therefore "lazy" protocols should use the `immediate(false)` option and manually call `open()`.
+    #[builder(into)]
+    protocols: MaybeSignal<Option<Vec<String>>>,
 }
 
 impl<Rx: ?Sized, E, D> UseWebSocketOptions<Rx, E, D> {
