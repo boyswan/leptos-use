@@ -1,6 +1,6 @@
 [package]
 name = "leptos-use"
-version = "0.14.0-beta1"
+version = "0.14.0-beta3"
 edition = "2021"
 authors = ["Marc-Stefan Cassola"]
 categories = ["gui", "web-programming"]
@@ -29,6 +29,9 @@ lazy_static = "1"
 leptos = { git = "https://github.com/leptos-rs/leptos" }
 leptos_axum = { optional = true, git = "https://github.com/leptos-rs/leptos" }
 leptos_actix = { optional = true, git = "https://github.com/leptos-rs/leptos" }
+# leptos = "0.7.0-beta5"
+# leptos_axum = { optional = true, version = "0.7.0-beta5" }
+# leptos_actix = { optional = true, version = "0.7.0-beta5" }
 leptos-spin = { version = "0.2", optional = true }
 num = { version = "0.4", optional = true }
 paste = "1"
@@ -47,7 +50,7 @@ codee = { version = "0.2", features = [
   "prost",
 ] }
 getrandom = { version = "0.2", features = ["js"] }
-leptos_meta = { version = "0.7.0-beta" }
+leptos_meta = { version = "0.7.0-beta5" }
 rand = "0.8"
 serde = { version = "1", features = ["derive"] }
 unic-langid = { version = "0.9", features = ["macros"] }
