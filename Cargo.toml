@@ -28,8 +28,8 @@ js-sys = "0.3"
 lazy_static = "1"
 # 1ca4f34ef3d2f91907725be9358f8c36a9e24701
 leptos = { git = "https://github.com/boyswan/leptos" , branch =  "abandon-the-dream"}
-leptos_axum = { optional = true, git = "https://github.com/boyswan/leptos" , branch =  "abandon-the-dream"}
-leptos_actix = { optional = true, git = "https://github.com/boyswan/leptos" , branch =  "abandon-the-dream"}
+leptos_axum = { optional = true, git = "https://github.com/leptos-rs/leptos" , branch =  "abandon-the-dream"}
+leptos_actix = { optional = true, git = "https://github.com/leptos-rs/leptos" , branch =  "abandon-the-dream"}
 # leptos = "0.7.0-beta5"
 # leptos_axum = { optional = true, version = "0.7.0-beta5" }
 # leptos_actix = { optional = true, version = "0.7.0-beta5" }
